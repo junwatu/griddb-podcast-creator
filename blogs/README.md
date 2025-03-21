@@ -1,5 +1,6 @@
 # Generate Podcast from PDF using AI
 
+![cover](images/cover.jpg)
 
 ## Introduction
 
