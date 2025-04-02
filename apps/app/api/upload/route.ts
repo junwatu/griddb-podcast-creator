@@ -75,12 +75,16 @@ export async function POST(request: NextRequest) {
 
         console.log('OCR Response:', ocrResponse);
 
+        // process the ocrResponse into audio script
+
         return NextResponse.json({
             message: 'File uploaded successfully',
             fileName: file.name,
             fileSize: file.size,
             tempFilePath: tempFilePath,
-            ocrResponse: ocrResponse
+            ocrResponse: ocrResponse,
+            audioFile: null,
+            audioScript: null,
         });
 
     } catch (error) {
