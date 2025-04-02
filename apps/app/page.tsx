@@ -19,11 +19,30 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.type === "application/pdf") {
-        setSelectedFile(file);
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to upload file');
+          }
+
+          setSelectedFile(file);
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          alert(error instanceof Error ? error.message : 'Failed to upload file');
+        }
       } else {
         alert("Please upload a PDF file");
       }
