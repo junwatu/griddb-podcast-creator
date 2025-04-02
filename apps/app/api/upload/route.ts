@@ -52,13 +52,28 @@ export async function POST(request: NextRequest) {
         console.log('File saved to:', tempFilePath);
 
         const uploaded_file = fs.readFileSync(tempFilePath);
-        const ocrResponse = await client.files.upload({
+        const uploaded_pdf = await client.files.upload({
             file: {
-                fileName: `${file.name}.pdf`,
+                fileName: file.name,
                 content: uploaded_file,
             },
             purpose: "ocr"
         });
+
+        // get signedURL
+        const signedUrl = await client.files.getSignedUrl({
+            fileId: uploaded_pdf.id,
+        });
+
+        const ocrResponse = await client.ocr.process({
+            model: "mistral-ocr-latest",
+            document: {
+                type: "document_url",
+                documentUrl: signedUrl.url,
+            }
+        });
+
+        console.log('OCR Response:', ocrResponse);
 
         return NextResponse.json({
             message: 'File uploaded successfully',
