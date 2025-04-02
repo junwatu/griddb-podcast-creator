@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
+import os from 'os';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,17 +32,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Here you would typically:
-    // 1. Save the file to a temporary location or cloud storage
-    // 2. Process the PDF file (OCR, text extraction, etc.)
-    // 3. Return a success response with necessary data
-    console.log(file.name)
-    console.log(file.size)
-    // For now, we'll return a mock success response
+    // Create a unique temporary file path
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    
+    // Generate a unique filename using timestamp and random string
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(7);
+    const tempFilename = `upload_${timestamp}_${randomString}.pdf`;
+    const tempFilePath = join(os.tmpdir(), tempFilename);
+    
+    // Save the file to temp directory
+    await writeFile(tempFilePath, buffer);
+
+    console.log('File saved to:', tempFilePath);
+    
     return NextResponse.json({
       message: 'File uploaded successfully',
       fileName: file.name,
       fileSize: file.size,
+      tempFilePath: tempFilePath
     });
 
   } catch (error) {
