@@ -14,59 +14,87 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isConverting, setIsConverting] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
+  const [selectedVoice, setSelectedVoice] = useState("female1");
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.type === "application/pdf") {
-        try {
-          const formData = new FormData();
-          formData.append('file', file);
-
-          const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to upload file');
-          }
-
-          setSelectedFile(file);
-        } catch (error) {
-          console.error('Error uploading file:', error);
-          alert(error instanceof Error ? error.message : 'Failed to upload file');
-        }
+        setSelectedFile(file);
       } else {
         alert("Please upload a PDF file");
       }
     }
   };
 
-  const handleConvert = () => {
+  const handleUploadAndConvert = async () => {
     if (!selectedFile) return;
     
-    setIsConverting(true);
+    setIsProcessing(true);
     setConvertProgress(0);
     
-    // Simulate conversion process
-    const interval = setInterval(() => {
-      setConvertProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsConverting(false);
-          setAudioUrl("dummy-audio-url"); // In a real app, this would be the actual audio URL
-          return 100;
-        }
-        return prev + 10;
+    try {
+      // Create form data with the file and selected voice
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('voice', selectedVoice);
+
+      // Set up progress simulation
+      const intervalId = setInterval(() => {
+        setConvertProgress(prev => {
+          const newProgress = prev + Math.floor(Math.random() * 10) + 1;
+          return newProgress > 95 ? 95 : newProgress;
+        });
+      }, 500);
+
+      // Start upload and conversion process
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
       });
-    }, 500);
+
+      const data = await response.json();
+
+      console.log(data);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process file');
+      }
+
+      // Clear interval and complete progress
+      clearInterval(intervalId);
+      setConvertProgress(100);
+      
+      // Handle response data from the API
+      const {
+        message,
+        fileName,
+        fileSize,
+        tempFilePath,
+        ocrResponse,
+        audioFile,
+        audioScript
+      } = data;
+
+      // Store relevant data for podcast player
+      // If audioFile is null, we'll use a dummy URL for demonstration
+      setAudioUrl(audioFile || "dummy-audio-url");
+      
+      // Store OCR text or audio script if needed for other features
+      // This could be used in an extended version of the app
+      
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 500);
+    } catch (error) {
+      console.error('Error processing file:', error);
+      setIsProcessing(false);
+      alert(error instanceof Error ? error.message : 'Failed to process file');
+    }
   };
 
   return (
@@ -102,8 +130,13 @@ export default function Home() {
                     accept=".pdf"
                     onChange={handleFileChange}
                     className="flex-1"
+                    disabled={isProcessing}
                   />
-                  <Button variant="outline" onClick={() => document.getElementById('pdf-upload')?.click()}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => document.getElementById('pdf-upload')?.click()}
+                    disabled={isProcessing}
+                  >
                     <Upload className="h-4 w-4 mr-2" />
                     Browse
                   </Button>
@@ -118,10 +151,15 @@ export default function Home() {
 
               {selectedFile && (
                 <>
+                {/*
                   <div className="space-y-4">
                     <div>
                       <Label>Voice Selection</Label>
-                      <Select defaultValue="female1">
+                      <Select
+                        value={selectedVoice}
+                        onValueChange={setSelectedVoice}
+                        disabled={isProcessing}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a voice" />
                         </SelectTrigger>
@@ -134,8 +172,9 @@ export default function Home() {
                       </Select>
                     </div>
                   </div>
+                  */}
 
-                  {isConverting ? (
+                  {isProcessing ? (
                     <div className="space-y-2">
                       <Label>Converting PDF to Podcast...</Label>
                       <Progress value={convertProgress} className="w-full" />
@@ -158,10 +197,10 @@ export default function Home() {
             <CardFooter>
               <Button 
                 className="w-full" 
-                disabled={!selectedFile || isConverting || !!audioUrl}
-                onClick={handleConvert}
+                disabled={!selectedFile || isProcessing || !!audioUrl}
+                onClick={handleUploadAndConvert}
               >
-                {isConverting ? 'Converting...' : 'Convert to Podcast'}
+                {isProcessing ? 'Processing...' : 'Convert to Podcast'}
               </Button>
             </CardFooter>
           </Card>
