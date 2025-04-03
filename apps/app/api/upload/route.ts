@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Mistral } from '@mistralai/mistralai';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import os from 'os';
-import fs from 'fs';
 import OpenAI from "openai";
+import { OCRService } from '../../lib/ocr';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const apiKey = process.env.MISTRAL_API_KEY;
-const client = new Mistral({ apiKey: apiKey });
+const ocrService = new OCRService(process.env.MISTRAL_API_KEY || '');
 
 export async function POST(request: NextRequest) {
     try {
@@ -50,32 +48,8 @@ export async function POST(request: NextRequest) {
         await writeFile(tempFilePath, buffer);
         console.log('File saved to:', tempFilePath);
 
-        const uploaded_file = fs.readFileSync(tempFilePath);
-        const uploaded_pdf = await client.files.upload({
-            file: {
-                fileName: file.name,
-                content: uploaded_file,
-            },
-            purpose: "ocr"
-        });
-
-        const signedUrl = await client.files.getSignedUrl({
-            fileId: uploaded_pdf.id,
-        });
-
-        // Perform OCR
-        const ocrResponse = await client.ocr.process({
-            model: "mistral-ocr-latest",
-            document: {
-                type: "document_url",
-                documentUrl: signedUrl.url,
-            }
-        });
-
-        let pdfContent = "";
-        for (const page of ocrResponse.pages) {
-            pdfContent += page.markdown + "\n";
-        }
+        // Process the PDF file with OCR
+        const { content: pdfContent, response: ocrResponse } = await ocrService.processFile(tempFilePath, file.name);
 
         console.log('PDF Content:', pdfContent);
         const response = await openai.responses.create({
