@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
 
         // ignore this error
         // @ts-ignore
-        console.log('Response:', response.output[0]?.content[0].text);
+        const audioScript =  response.output[0]?.content[0].text;
 
         return NextResponse.json({
             message: 'File uploaded successfully',
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
             tempFilePath: tempFilePath,
             ocrResponse: ocrResponse,
             audioFile: null,
-            audioScript: null,
+            audioScript: audioScript,
         });
 
     } catch (error) {
