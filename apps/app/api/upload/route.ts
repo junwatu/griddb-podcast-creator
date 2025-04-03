@@ -160,7 +160,10 @@ export async function POST(request: NextRequest) {
             top_p: 1,
             store: true
           });
-        console.log('Response:', response);
+
+        // ignore this error
+        // @ts-ignore
+        console.log('Response:', response.output[0]?.content[0].text);
 
         return NextResponse.json({
             message: 'File uploaded successfully',
