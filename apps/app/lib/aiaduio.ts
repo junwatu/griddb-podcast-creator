@@ -16,6 +16,7 @@ interface PodcastData {
 interface PodcastOptions {
   model?: string;
   voice?: string;
+  instructions?: string;
   outputFormat?: string;
   outputDir?: string;
 }
@@ -37,10 +38,11 @@ export async function generatePodcastAudio(
   options: PodcastOptions = {}
 ): Promise<AudioFiles> {
   const {
-    model = 'tts-1',
-    voice = 'alloy',
+    model = 'gpt-4o-mini-tts',
+    voice = 'fable',
+    instructions = 'excited and informable podcaster',
     outputFormat = 'mp3',
-    outputDir = './'
+    outputDir = './audio'
   } = options;
 
   const openai = new OpenAI({ apiKey });
@@ -76,6 +78,7 @@ export async function generatePodcastAudio(
       const response = await openai.audio.speech.create({
         model,
         voice,
+        instructions,
         input: text
       });
 

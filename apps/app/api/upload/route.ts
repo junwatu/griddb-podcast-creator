@@ -5,9 +5,20 @@ import os from 'os';
 
 import { OCRService } from '../../lib/ocr';
 import { OpenAIService } from '../../lib/openai';
+import { generatePodcastAudio } from '@/app/lib/aiaduio';
 
 const ocrService = new OCRService(process.env.MISTRAL_API_KEY || '');
 const openaiService = new OpenAIService(process.env.OPENAI_API_KEY || '');
+const audioDir = './../public/audio';
+const instructions = `**Voice:** Warm, charismatic, and deeply engaging—like a storyteller by a crackling campfire, pulling you in with every word.  
+
+**Tone:** Confident yet approachable, striking a balance between authority and friendliness, making complex topics feel simple and intriguing.  
+
+**Speech Mannerisms:** Uses vivid imagery, rhetorical questions, and the occasional well-placed pause to build anticipation. Naturally conversational, with a touch of humor and enthusiasm to keep listeners hooked.  
+
+**Pronunciation:** Clear and expressive, with subtle inflections that emphasize key points. Words are articulated with precision but never feel rigid or overly polished.  
+
+**Tempo:** Moderately paced, adjusting fluidly based on the topic—slowing down for emphasis, speeding up for excitement, ensuring a dynamic and engaging listening experience.`
 
 export async function POST(request: NextRequest) {
     try {
@@ -51,7 +62,15 @@ export async function POST(request: NextRequest) {
 
         console.log('PDF Content:', pdfContent);
         const audioScript = await openaiService.generatePodcastScript(pdfContent);
+        const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_API_KEY || '', {
+            voice: 'alloy',
+            outputDir: audioDir,
+            instructions: instructions,
+            outputFormat: 'mp3',
+        });
 
+        console.log('Audio Files:', audioFiles);
+        
         return NextResponse.json({
             message: 'File uploaded successfully',
             fileName: file.name,
