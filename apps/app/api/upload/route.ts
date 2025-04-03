@@ -63,13 +63,17 @@ export async function POST(request: NextRequest) {
         console.log('PDF Content:', pdfContent);
         const audioScript = await openaiService.generatePodcastScript(pdfContent);
         const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_API_KEY || '', {
-            voice: 'alloy',
+            voice: 'verse',
             outputDir: audioDir,
             instructions: instructions,
             outputFormat: 'mp3',
         });
 
         console.log('Audio Files:', audioFiles);
+
+        /** Save the data into GridDB database */
+       // HERE
+       //
         
         return NextResponse.json({
             message: 'File uploaded successfully',
@@ -77,7 +81,7 @@ export async function POST(request: NextRequest) {
             fileSize: file.size,
             tempFilePath: tempFilePath,
             ocrResponse: ocrResponse,
-            audioFile: null,
+            audioFiles: audioFiles,
             audioScript: audioScript,
         });
 
