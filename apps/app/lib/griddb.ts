@@ -1,48 +1,4 @@
-// Types for GridDB client configuration
-interface GridDBConfig {
-	griddbWebApiUrl: string;
-	username: string;
-	password: string;
-}
-
-// Types for container columns
-interface GridDBColumn {
-	name: string;
-	type: 'INTEGER' | 'STRING' | 'FLOAT' | 'BOOLEAN' | 'TIMESTAMP';
-}
-
-// Types for container data
-interface GridDBData {
-	id: string | number;
-	ocrResponse: string;
-	audioScript: string;
-	audioFiles: string;
-}
-
-// Types for SQL queries
-interface GridDBQuery {
-	type: string;
-	stmt: string;
-}
-
-// Types for API responses
-interface GridDBResponse {
-	message?: string;
-	response?: string;
-}
-
-// Types for GridDB errors
-class GridDBError extends Error {
-  constructor(
-    message: string,
-    public readonly code?: number,
-    public readonly status?: number,
-    public readonly details?: unknown
-  ) {
-    super(message);
-    this.name = 'GridDBError';
-  }
-}
+import { GridDBConfig, GridDBColumn, GridDBData, GridDBQuery, GridDBResponse, GridDBError } from './types/griddb.types';
 
 /**
  * Creates a GridDB client for making API requests
@@ -146,7 +102,7 @@ export function createGridDBClient(config: GridDBConfig) {
 
 	async function insertData({
 		data,
-		containerName = 'resumes'
+		containerName = 'podcasts'
 	}: {
 		data: GridDBData;
 		containerName?: string;
