@@ -60,8 +60,9 @@ export async function POST(request: NextRequest) {
         // Process the PDF file with OCR
         const { content: pdfContent, response: ocrResponse } = await ocrService.processFile(tempFilePath, file.name);
 
-        console.log('PDF Content:', pdfContent);
+        //console.log('PDF Content:', pdfContent);
         const audioScript = await openaiService.generatePodcastScript(pdfContent);
+        console.log('Audio Script:', audioScript);
         const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_API_KEY || '', {
             voice: 'verse',
             outputDir: audioDir,

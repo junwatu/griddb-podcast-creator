@@ -105,7 +105,7 @@ export class OpenAIService {
             });
 
             // @ts-ignore
-            return response.output[0]?.content[0].text;
+            return JSON.parse(response.output[0]?.content[0].text);
         } catch (error) {
             console.error('Error generating podcast script:', error);
             throw error;
