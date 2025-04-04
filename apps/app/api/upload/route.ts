@@ -6,6 +6,9 @@ import os from 'os';
 import { OCRService } from '../../lib/ocr';
 import { OpenAIService } from '../../lib/openai';
 import { generatePodcastAudio } from '@/app/lib/aiaduio';
+import { createGridDBClient } from '../../lib/griddb';
+import { generateRandomID } from "../../lib/randomId";
+import { GridDBConfig, GridDBData } from '@/app/lib/types/griddb.types';
 
 const ocrService = new OCRService(process.env.MISTRAL_API_KEY || '');
 const openaiService = new OpenAIService(process.env.OPENAI_API_KEY || '');
@@ -19,6 +22,15 @@ const instructions = `**Voice:** Warm, charismatic, and deeply engaging—like a
 **Pronunciation:** Clear and expressive, with subtle inflections that emphasize key points. Words are articulated with precision but never feel rigid or overly polished.  
 
 **Tempo:** Moderately paced, adjusting fluidly based on the topic—slowing down for emphasis, speeding up for excitement, ensuring a dynamic and engaging listening experience.`
+
+const dbConfig: GridDBConfig = {
+    griddbWebApiUrl: process.env.GRIDDB_WEBAPI_URL || '',
+    username: process.env.GRIDDB_USERNAME || '',
+    password: process.env.GRIDDB_PASSWORD || '',
+}
+
+const dbClient = createGridDBClient(dbConfig);
+dbClient.createContainer();
 
 export async function POST(request: NextRequest) {
     try {
@@ -73,9 +85,16 @@ export async function POST(request: NextRequest) {
         console.log('Audio Files:', audioFiles);
 
         /** Save the data into GridDB database */
-       // HERE
-       //
-        
+        const podcastData: GridDBData = {
+            id: generateRandomID(),
+            audioFiles: JSON.stringify(audioFiles),
+            audioScript: JSON.stringify(audioScript),
+            ocrResponse: JSON.stringify(ocrResponse),
+        }
+
+        const result = await dbClient.insertData({ data: podcastData });
+        console.log('GridDB Insert Result:', result);
+
         return NextResponse.json({
             message: 'File uploaded successfully',
             fileName: file.name,
