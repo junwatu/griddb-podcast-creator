@@ -52,10 +52,10 @@ export default function Home() {
 
   const handleUploadAndConvert = async () => {
     if (!selectedFile) return;
-    
+
     setIsProcessing(true);
     setConvertProgress(0);
-    
+
     try {
       // Create form data with the file and selected voice
       const formData = new FormData();
@@ -87,7 +87,7 @@ export default function Home() {
       // Clear interval and complete progress
       clearInterval(intervalId);
       setConvertProgress(100);
-      
+
       // Handle response data from the API
       const {
         message,
@@ -104,13 +104,13 @@ export default function Home() {
         audioFiles,
         audioScript
       });
-      
+
       // Set the audio URL for the first section
       setAudioUrl(audioFiles.introduction);
-      
+
       // Store OCR text or audio script if needed for other features
       // This could be used in an extended version of the app
-      
+
       setTimeout(() => {
         setIsProcessing(false);
       }, 500);
@@ -135,7 +135,7 @@ export default function Home() {
           <TabsTrigger value="upload">Upload & Convert</TabsTrigger>
           <TabsTrigger value="library" disabled={!audioUrl}>Your Podcasts</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="upload">
           <Card>
             <CardHeader>
@@ -156,8 +156,8 @@ export default function Home() {
                     className="flex-1"
                     disabled={isProcessing}
                   />
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => document.getElementById('pdf-upload')?.click()}
                     disabled={isProcessing}
                   >
@@ -175,27 +175,6 @@ export default function Home() {
 
               {selectedFile && (
                 <>
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Voice Selection</Label>
-                      <Select
-                        value={selectedVoice}
-                        onValueChange={setSelectedVoice}
-                        disabled={isProcessing}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a voice" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="female1">Emma (Female)</SelectItem>
-                          <SelectItem value="female2">Sophia (Female)</SelectItem>
-                          <SelectItem value="male1">James (Male)</SelectItem>
-                          <SelectItem value="male2">Michael (Male)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
                   {isProcessing ? (
                     <div className="space-y-2">
                       <Label>Converting PDF to Podcast...</Label>
@@ -217,8 +196,8 @@ export default function Home() {
               )}
             </CardContent>
             <CardFooter>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 disabled={!selectedFile || isProcessing || !!audioUrl}
                 onClick={handleUploadAndConvert}
               >
@@ -227,7 +206,7 @@ export default function Home() {
             </CardFooter>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="library">
           <Card>
             <CardHeader>
@@ -248,32 +227,32 @@ export default function Home() {
                     <div className="mb-4">
                       <h3 className="text-lg font-semibold mb-2">
                         {currentSection === 0 ? "Introduction" :
-                         currentSection === audioData.audioScript.main_talking_points.length + 1 ? "Conclusion" :
-                         currentSection === audioData.audioScript.main_talking_points.length + 2 ? "Call to Action" :
-                         audioData.audioScript.main_talking_points[currentSection - 1].title}
+                          currentSection === audioData.audioScript.main_talking_points.length + 1 ? "Conclusion" :
+                            currentSection === audioData.audioScript.main_talking_points.length + 2 ? "Call to Action" :
+                              audioData.audioScript.main_talking_points[currentSection - 1].title}
                       </h3>
                       <p className="text-sm text-gray-600">
                         {currentSection === 0 ? audioData.audioScript.introduction :
-                         currentSection === audioData.audioScript.main_talking_points.length + 1 ? audioData.audioScript.conclusion :
-                         currentSection === audioData.audioScript.main_talking_points.length + 2 ? audioData.audioScript.call_to_action :
-                         audioData.audioScript.main_talking_points[currentSection - 1].content}
+                          currentSection === audioData.audioScript.main_talking_points.length + 1 ? audioData.audioScript.conclusion :
+                            currentSection === audioData.audioScript.main_talking_points.length + 2 ? audioData.audioScript.call_to_action :
+                              audioData.audioScript.main_talking_points[currentSection - 1].content}
                       </p>
                     </div>
-                    
+
                     <div className="space-y-2">
-                      <Progress 
-                        value={(currentTime / duration) * 100 || 0} 
-                        className="w-full" 
+                      <Progress
+                        value={(currentTime / duration) * 100 || 0}
+                        className="w-full"
                       />
                       <div className="flex justify-between text-sm text-gray-500">
                         <span>{formatTime(currentTime)}</span>
                         <span>{formatTime(duration)}</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex justify-center gap-4 mt-4">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="icon"
                         onClick={() => {
                           if (currentSection > 0) {
@@ -284,8 +263,8 @@ export default function Home() {
                       >
                         <SkipBack className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        size="icon" 
+                      <Button
+                        size="icon"
                         onClick={() => {
                           if (isPlaying) {
                             audioRef.current?.pause();
@@ -297,8 +276,8 @@ export default function Home() {
                       >
                         {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="icon"
                         onClick={() => {
                           if (currentSection < audioData.audioScript.main_talking_points.length + 2) {
@@ -311,26 +290,26 @@ export default function Home() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <Volume2 className="h-4 w-4" />
-                    <Slider 
-                      defaultValue={[70]} 
-                      max={100} 
-                      step={1} 
+                    <Slider
+                      defaultValue={[70]}
+                      max={100}
+                      step={1}
                       className="flex-1"
                       onValueChange={(value) => {
                         if (audioRef.current) {
                           audioRef.current.volume = value[0] / 100;
                         }
-                      }} 
+                      }}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <h4 className="font-medium">Sections</h4>
                     <div className="space-y-1">
-                      <Button 
+                      <Button
                         variant={currentSection === 0 ? "default" : "ghost"}
                         className="w-full justify-start"
                         onClick={() => setCurrentSection(0)}
@@ -347,14 +326,14 @@ export default function Home() {
                           {point.title}
                         </Button>
                       ))}
-                      <Button 
+                      <Button
                         variant={currentSection === audioData.audioScript.main_talking_points.length + 1 ? "default" : "ghost"}
                         className="w-full justify-start"
                         onClick={() => setCurrentSection(audioData.audioScript.main_talking_points.length + 1)}
                       >
                         Conclusion
                       </Button>
-                      <Button 
+                      <Button
                         variant={currentSection === audioData.audioScript.main_talking_points.length + 2 ? "default" : "ghost"}
                         className="w-full justify-start"
                         onClick={() => setCurrentSection(audioData.audioScript.main_talking_points.length + 2)}
@@ -367,9 +346,9 @@ export default function Home() {
                   <audio
                     ref={audioRef}
                     src={currentSection === 0 ? audioData.audioFiles.introduction :
-                         currentSection === audioData.audioScript.main_talking_points.length + 1 ? audioData.audioFiles.conclusion :
-                         currentSection === audioData.audioScript.main_talking_points.length + 2 ? audioData.audioFiles.call_to_action :
-                         audioData.audioFiles[`talking_point_${currentSection - 1}`]}
+                      currentSection === audioData.audioScript.main_talking_points.length + 1 ? audioData.audioFiles.conclusion :
+                        currentSection === audioData.audioScript.main_talking_points.length + 2 ? audioData.audioFiles.call_to_action :
+                          audioData.audioFiles[`talking_point_${currentSection - 1}`]}
                     onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
                     onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                     onEnded={() => {
