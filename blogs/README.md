@@ -73,6 +73,11 @@ The diagram above illustrates the simplified workflow of the AI-powered PDF-to-p
 
 ----
 
+## Run the Project
+
+
+
+
 ## Prerequisites
 
 ### Setting up Next.js
