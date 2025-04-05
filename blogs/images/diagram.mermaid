@@ -1,0 +1,6 @@
+graph TD
+    A[User Uploads PDF] --> B[OCR Text Extraction<br/><b>Mistral AI OCR</b>]
+    B --> C[Summarize Content <br/><b>OpenAI</b>]
+    C --> D[Convert Text to Podcast<br/><b>OpenAI TTS</b>]
+    D --> E[Store Data<br/><b>GridDB Cloud]
+    E --> F[Podcast<br/><b>Playback</b>]
