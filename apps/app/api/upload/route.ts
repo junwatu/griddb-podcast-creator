@@ -12,7 +12,7 @@ import { GridDBConfig, GridDBData } from '@/app/lib/types/griddb.types';
 
 const ocrService = new OCRService(process.env.MISTRAL_API_KEY || '');
 const openaiService = new OpenAIService(process.env.OPENAI_API_KEY || '');
-const audioDir = './../public/audio';
+const audioDir = './public/audio';
 const instructions = `**Voice:** Warm, charismatic, and deeply engaging—like a storyteller by a crackling campfire, pulling you in with every word.  
 
 **Tone:** Confident yet approachable, striking a balance between authority and friendliness, making complex topics feel simple and intriguing.  
@@ -76,34 +76,34 @@ export async function POST(request: NextRequest) {
         const audioScript = await openaiService.generatePodcastScript(pdfContent);
         console.log('Audio Script:', audioScript);
 
-        /** enable this for production, it will cost you money 
+        /** enable this for production, it will cost you money */
         const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_API_KEY || '', {
             voice: 'verse',
             outputDir: audioDir,
             instructions: instructions,
             outputFormat: 'mp3',
         });
-        */
 
-        //console.log('Audio Files:', audioFiles);
+        console.log('Audio Files:', audioFiles);
 
-        // dummy
+        /** 
         const dummyAudioFiles = 
         {
-            introduction: '../public/audio/introduction.mp3',
-            conclusion: '../public/audio/conclusion.mp3',
-            call_to_action: '../public/audio/call_to_action.mp3',
-            talking_point_0: '../public/audio/talking_point_0.mp3',
-            talking_point_1: '../public/audio/talking_point_1.mp3',
-            talking_point_2: '../public/audio/talking_point_2.mp3',
-            talking_point_3: '../public/audio/talking_point_3.mp3'
+            introduction: '/audio/introduction.mp3',
+            conclusion: '/audio/conclusion.mp3',
+            call_to_action: '/audio/call_to_action.mp3',
+            talking_point_0: '/audio/talking_point_0.mp3',
+            talking_point_1: '/audio/talking_point_1.mp3',
+            talking_point_2: '/audio/talking_point_2.mp3',
+            talking_point_3: '/audio/talking_point_3.mp3'
           }
+        */
 
         /** Save the data into GridDB database */
         const podcastData: GridDBData = {
             id: generateRandomID(),
             // use dummy audio files for now
-            audioFiles: JSON.stringify(dummyAudioFiles),
+            audioFiles: JSON.stringify(audioFiles),
             audioScript: JSON.stringify(audioScript),
             // ts ignore
             // @ts-ignore
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
             fileSize: file.size,
             tempFilePath: tempFilePath,
             ocrResponse: ocrResponse,
-            audioFiles: dummyAudioFiles,
+            audioFiles: audioFiles,
             audioScript: audioScript,
         });
 
