@@ -62,11 +62,6 @@ export async function generatePodcastAudio(
       const fileName = `${key}.${outputFormat}`;
       const speechFile = path.join(outputDir, fileName);
 
-      // Debug
-      console.log(`Processing ${key}...`);
-      console.log(`Text: ${text}`);
-      console.log(`File Name: ${fileName}`);
-      console.log(`Speech File: ${speechFile}`);
       const response = await openai.audio.speech.create({
         model,
         voice,
