@@ -52,10 +52,10 @@ export async function generatePodcastAudio(
   fs.mkdirSync(outputDir, { recursive: true });
 
   const audioFiles: AudioFiles = {};
-  
+
   // Process introduction, conclusion, and call_to_action
   const simpleKeys = ['introduction', 'conclusion', 'call_to_action'] as const;
-  
+
   for (const key of simpleKeys) {
     try {
       const text = podcastData[key];
@@ -68,17 +68,17 @@ export async function generatePodcastAudio(
         instructions,
         input: text
       });
-      
+
       const buffer = Buffer.from(await response.arrayBuffer());
       fs.writeFileSync(speechFile, buffer);
-      
+
       audioFiles[key] = speechFile;
     } catch (error) {
       console.error(`Error processing ${key}:`, error);
       throw error;
     }
   }
-  
+
   // Process main talking points separately
   if (Array.isArray(podcastData.main_talking_points)) {
     for (let i = 0; i < podcastData.main_talking_points.length; i++) {
@@ -87,17 +87,17 @@ export async function generatePodcastAudio(
         const text = point.content;
         const fileName = `talking_point_${i}.${outputFormat}`;
         const speechFile = path.join(outputDir, fileName);
-        
+
         const response = await openai.audio.speech.create({
           model,
           voice,
           instructions,
           input: text
         });
-        
+
         const buffer = Buffer.from(await response.arrayBuffer());
         fs.writeFileSync(speechFile, buffer);
-        
+
         audioFiles[`talking_point_${i}`] = speechFile;
       } catch (error) {
         console.error(`Error processing talking point ${i}:`, error);
