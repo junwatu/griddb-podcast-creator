@@ -1,6 +1,12 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,8 +23,21 @@ export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audioUrl, setAudioUrl] = useState("");
-  const [selectedVoice, setSelectedVoice] = useState("female1");
+  const [currentSection, setCurrentSection] = useState(0);
+  const [audioData, setAudioData] = useState<{
+    audioFiles: Record<string, string>;
+    audioScript: {
+      introduction: string;
+      main_talking_points: Array<{ title: string; content: string }>;
+      conclusion: string;
+      call_to_action: string;
+    };
+  } | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [selectedVoice, setSelectedVoice] = useState('female1');
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -76,13 +95,18 @@ export default function Home() {
         fileSize,
         tempFilePath,
         ocrResponse,
-        audioFile,
+        audioFiles,
         audioScript
       } = data;
 
-      // Store relevant data for podcast player
-      // If audioFile is null, we'll use a dummy URL for demonstration
-      setAudioUrl(audioFile || "dummy-audio-url");
+      // Store audio data for the podcast player
+      setAudioData({
+        audioFiles,
+        audioScript
+      });
+      
+      // Set the audio URL for the first section
+      setAudioUrl(audioFiles.introduction);
       
       // Store OCR text or audio script if needed for other features
       // This could be used in an extended version of the app
@@ -151,7 +175,6 @@ export default function Home() {
 
               {selectedFile && (
                 <>
-                {/*
                   <div className="space-y-4">
                     <div>
                       <Label>Voice Selection</Label>
@@ -172,7 +195,6 @@ export default function Home() {
                       </Select>
                     </div>
                   </div>
-                  */}
 
                   {isProcessing ? (
                     <div className="space-y-2">
@@ -215,30 +237,76 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {audioUrl && (
+              {audioData && (
                 <div className="space-y-6">
                   <div className="bg-gray-100 p-4 rounded-lg">
                     <div className="flex items-center gap-2 mb-4">
                       <FileText className="h-5 w-5" />
                       <span className="font-medium">{selectedFile?.name}</span>
                     </div>
+
+                    <div className="mb-4">
+                      <h3 className="text-lg font-semibold mb-2">
+                        {currentSection === 0 ? "Introduction" :
+                         currentSection === audioData.audioScript.main_talking_points.length + 1 ? "Conclusion" :
+                         currentSection === audioData.audioScript.main_talking_points.length + 2 ? "Call to Action" :
+                         audioData.audioScript.main_talking_points[currentSection - 1].title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {currentSection === 0 ? audioData.audioScript.introduction :
+                         currentSection === audioData.audioScript.main_talking_points.length + 1 ? audioData.audioScript.conclusion :
+                         currentSection === audioData.audioScript.main_talking_points.length + 2 ? audioData.audioScript.call_to_action :
+                         audioData.audioScript.main_talking_points[currentSection - 1].content}
+                      </p>
+                    </div>
                     
                     <div className="space-y-2">
-                      <Progress value={30} className="w-full" />
+                      <Progress 
+                        value={(currentTime / duration) * 100 || 0} 
+                        className="w-full" 
+                      />
                       <div className="flex justify-between text-sm text-gray-500">
-                        <span>3:45</span>
-                        <span>12:20</span>
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
                       </div>
                     </div>
                     
                     <div className="flex justify-center gap-4 mt-4">
-                      <Button variant="outline" size="icon">
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => {
+                          if (currentSection > 0) {
+                            setCurrentSection(currentSection - 1);
+                          }
+                        }}
+                        disabled={currentSection === 0}
+                      >
                         <SkipBack className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" onClick={() => setIsPlaying(!isPlaying)}>
+                      <Button 
+                        size="icon" 
+                        onClick={() => {
+                          if (isPlaying) {
+                            audioRef.current?.pause();
+                          } else {
+                            audioRef.current?.play();
+                          }
+                          setIsPlaying(!isPlaying);
+                        }}
+                      >
                         {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                       </Button>
-                      <Button variant="outline" size="icon">
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => {
+                          if (currentSection < audioData.audioScript.main_talking_points.length + 2) {
+                            setCurrentSection(currentSection + 1);
+                          }
+                        }}
+                        disabled={currentSection === audioData.audioScript.main_talking_points.length + 2}
+                      >
                         <SkipForward className="h-4 w-4" />
                       </Button>
                     </div>
@@ -246,13 +314,72 @@ export default function Home() {
                   
                   <div className="flex items-center gap-2">
                     <Volume2 className="h-4 w-4" />
-                    <Slider defaultValue={[70]} max={100} step={1} className="flex-1" />
+                    <Slider 
+                      defaultValue={[70]} 
+                      max={100} 
+                      step={1} 
+                      className="flex-1"
+                      onValueChange={(value) => {
+                        if (audioRef.current) {
+                          audioRef.current.volume = value[0] / 100;
+                        }
+                      }} 
+                    />
                   </div>
-                  
-                  <div className="flex justify-between">
-                    <Button variant="outline">Download MP3</Button>
-                   
+
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Sections</h4>
+                    <div className="space-y-1">
+                      <Button 
+                        variant={currentSection === 0 ? "default" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => setCurrentSection(0)}
+                      >
+                        Introduction
+                      </Button>
+                      {audioData.audioScript.main_talking_points.map((point, index) => (
+                        <Button
+                          key={index}
+                          variant={currentSection === index + 1 ? "default" : "ghost"}
+                          className="w-full justify-start"
+                          onClick={() => setCurrentSection(index + 1)}
+                        >
+                          {point.title}
+                        </Button>
+                      ))}
+                      <Button 
+                        variant={currentSection === audioData.audioScript.main_talking_points.length + 1 ? "default" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => setCurrentSection(audioData.audioScript.main_talking_points.length + 1)}
+                      >
+                        Conclusion
+                      </Button>
+                      <Button 
+                        variant={currentSection === audioData.audioScript.main_talking_points.length + 2 ? "default" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => setCurrentSection(audioData.audioScript.main_talking_points.length + 2)}
+                      >
+                        Call to Action
+                      </Button>
+                    </div>
                   </div>
+
+                  <audio
+                    ref={audioRef}
+                    src={currentSection === 0 ? audioData.audioFiles.introduction :
+                         currentSection === audioData.audioScript.main_talking_points.length + 1 ? audioData.audioFiles.conclusion :
+                         currentSection === audioData.audioScript.main_talking_points.length + 2 ? audioData.audioFiles.call_to_action :
+                         audioData.audioFiles[`talking_point_${currentSection - 1}`]}
+                    onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+                    onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+                    onEnded={() => {
+                      if (currentSection < audioData.audioScript.main_talking_points.length + 2) {
+                        setCurrentSection(currentSection + 1);
+                      } else {
+                        setIsPlaying(false);
+                      }
+                    }}
+                  />
                 </div>
               )}
             </CardContent>
