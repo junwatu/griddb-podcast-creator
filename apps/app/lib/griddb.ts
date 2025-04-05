@@ -58,10 +58,10 @@ export function createGridDBClient(config: GridDBConfig) {
 	}
 
 	async function createContainer({
-		containerName = 'resumes',
+		containerName = 'podcasts',
 		columns = [
 			{ name: 'id', type: 'INTEGER' },
-			{ name: 'ocrResponse', type: 'STRING' },
+			{ name: 'ocrResponse', type: 'BLOB' },
 			{ name: 'audioScript', type: 'STRING' },
 			{ name: 'audioFiles', type: 'STRING' }
 		],
@@ -134,6 +134,7 @@ export function createGridDBClient(config: GridDBConfig) {
 				throw new GridDBError('Queries must be a non-empty array of SQL query objects.');
 			}
 
+			// blob returned as base64.
 			return await makeRequest('/sql/dml/query', queries);
 		} catch (error) {
 			if (error instanceof GridDBError) {

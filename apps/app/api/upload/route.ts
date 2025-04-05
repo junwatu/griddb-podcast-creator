@@ -75,21 +75,39 @@ export async function POST(request: NextRequest) {
         //console.log('PDF Content:', pdfContent);
         const audioScript = await openaiService.generatePodcastScript(pdfContent);
         console.log('Audio Script:', audioScript);
+
+        /** enable this for production, it will cost you money 
         const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_API_KEY || '', {
             voice: 'verse',
             outputDir: audioDir,
             instructions: instructions,
             outputFormat: 'mp3',
         });
+        */
 
-        console.log('Audio Files:', audioFiles);
+        //console.log('Audio Files:', audioFiles);
+
+        // dummy
+        const dummyAudioFiles = 
+        {
+            introduction: '../public/audio/introduction.mp3',
+            conclusion: '../public/audio/conclusion.mp3',
+            call_to_action: '../public/audio/call_to_action.mp3',
+            talking_point_0: '../public/audio/talking_point_0.mp3',
+            talking_point_1: '../public/audio/talking_point_1.mp3',
+            talking_point_2: '../public/audio/talking_point_2.mp3',
+            talking_point_3: '../public/audio/talking_point_3.mp3'
+          }
 
         /** Save the data into GridDB database */
         const podcastData: GridDBData = {
             id: generateRandomID(),
-            audioFiles: JSON.stringify(audioFiles),
+            // use dummy audio files for now
+            audioFiles: JSON.stringify(dummyAudioFiles),
             audioScript: JSON.stringify(audioScript),
-            ocrResponse: JSON.stringify(ocrResponse),
+            // ts ignore
+            // @ts-ignore
+            ocrResponse: JSON.stringify(ocrResponse)
         }
 
         const result = await dbClient.insertData({ data: podcastData });
@@ -101,7 +119,7 @@ export async function POST(request: NextRequest) {
             fileSize: file.size,
             tempFilePath: tempFilePath,
             ocrResponse: ocrResponse,
-            audioFiles: audioFiles,
+            audioFiles: dummyAudioFiles,
             audioScript: audioScript,
         });
 

@@ -8,13 +8,13 @@ export interface GridDBConfig {
 // Types for container columns
 export interface GridDBColumn {
 	name: string;
-	type: 'INTEGER' | 'STRING' | 'FLOAT' | 'BOOLEAN' | 'TIMESTAMP';
+	type: 'INTEGER' | 'STRING' | 'FLOAT' | 'BOOLEAN' | 'TIMESTAMP' | 'BLOB';
 }
 
 // Types for container data
 export interface GridDBData {
 	id: string | number;
-	ocrResponse: string;
+	ocrResponse: Blob;
 	audioScript: string;
 	audioFiles: string;
 }
