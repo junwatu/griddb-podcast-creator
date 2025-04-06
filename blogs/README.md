@@ -75,19 +75,48 @@ The diagram above illustrates the simplified workflow of the AI-powered PDF-to-p
 
 ## Run the Project
 
+To run this project, you should clone the `apps` directory from this [repository](https://github.com/junwatu/griddb-podcast-creator.git). 
 
+```shell
+git clone https://github.com/junwatu/griddb-podcast-creator.git
+cd griddb-podcast-creator
+cd apps
+npm install
+```
+
+Create an `.env` file for the project credentials with these keys:
+
+```ini
+MISTRAL_API_KEY=
+OPENAI_API_KEY=
+GRIDDB_WEBAPI_URL=
+GRIDDB_PASSWORD=
+GRIDDB_USERNAME=
+```
+
+You need the Mistral API key for OCR functionality, OpenAI key for the text to speech (TTS) conversion and GridDB keys for the data storage.
+
+Run the project using this command:
+
+```shell
+npm run dev
+```
+
+Go to the default app URL `http://localhost:3000`
+
+
+![app screenshot](images/app-screenshot.png)
+
+
+Browse for the PDF file and click the **Convert to Podcast** button to generate podcast.
 
 
 ## Prerequisites
 
-### Setting up Next.js
-
-- Using Next.js latest LTS version. Installation commands and basics.
 
 ### Mistral OCR API Setup
 
-- Key features and advantages of using Mistral OCR.
-- How to obtain API key and setup instructions.
+Mistral API key is needed to use the OCR functionality. 
 
 ### OpenAI TTS API Setup
 
