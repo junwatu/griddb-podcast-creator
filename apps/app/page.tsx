@@ -7,13 +7,19 @@ const formatTime = (seconds: number) => {
   const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
+
+// Add helper function to clean audio paths
+const cleanAudioPath = (path: string) => {
+  // Remove everything up to and including 'public'
+  return path.replace(/^.*?public/, '');
+};
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Upload, FileText, Play, Pause, SkipForward, SkipBack, Volume2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -88,28 +94,20 @@ export default function Home() {
       clearInterval(intervalId);
       setConvertProgress(100);
 
-      // Handle response data from the API
-      const {
-        message,
-        fileName,
-        fileSize,
-        tempFilePath,
-        ocrResponse,
-        audioFiles,
-        audioScript
-      } = data;
+      // Clean the audio paths in the response
+      const cleanedAudioFiles: Record<string, string> = Object.entries(data.audioFiles as Record<string, string>).reduce((acc, [key, path]) => ({
+        ...acc,
+        [key]: cleanAudioPath(path)
+      }), {} as Record<string, string>);
 
-      // Store audio data for the podcast player
+      // Store audio data with cleaned paths
       setAudioData({
-        audioFiles,
-        audioScript
+        audioFiles: cleanedAudioFiles,
+        audioScript: data.audioScript
       });
 
-      // Set the audio URL for the first section
-      setAudioUrl(audioFiles.introduction);
-
-      // Store OCR text or audio script if needed for other features
-      // This could be used in an extended version of the app
+      // Set the audio URL for the first section with cleaned path
+      setAudioUrl(cleanedAudioFiles.introduction);
 
       setTimeout(() => {
         setIsProcessing(false);

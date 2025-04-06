@@ -12,7 +12,7 @@ import { GridDBConfig, GridDBData } from '@/app/lib/types/griddb.types';
 
 const ocrService = new OCRService(process.env.MISTRAL_API_KEY || '');
 const openaiService = new OpenAIService(process.env.OPENAI_API_KEY || '');
-const audioDir = './public/audio';
+const audioDir = join(process.cwd(), 'public', 'audio');
 const instructions = `**Voice:** Warm, charismatic, and deeply engaging—like a storyteller by a crackling campfire, pulling you in with every word.  
 
 **Tone:** Confident yet approachable, striking a balance between authority and friendliness, making complex topics feel simple and intriguing.  
@@ -31,6 +31,15 @@ const dbConfig: GridDBConfig = {
 
 const dbClient = createGridDBClient(dbConfig);
 dbClient.createContainer();
+
+function cleanAudioPaths(audioFiles: Record<string, string>): Record<string, string> {
+    const cleaned: Record<string, string> = {};
+    for (const [key, path] of Object.entries(audioFiles)) {
+        // Convert absolute paths to relative URLs
+        cleaned[key] = path.replace(/^.*\/public/, '');
+    }
+    return cleaned;
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -84,7 +93,9 @@ export async function POST(request: NextRequest) {
             outputFormat: 'mp3',
         });
 
-        console.log('Audio Files:', audioFiles);
+        // Clean the audio file paths
+        const cleanedAudioFiles = cleanAudioPaths(audioFiles);
+        console.log('Cleaned Audio Files:', cleanedAudioFiles);
 
         /** 
         const dummyAudioFiles = 
@@ -103,7 +114,7 @@ export async function POST(request: NextRequest) {
         const podcastData: GridDBData = {
             id: generateRandomID(),
             // use dummy audio files for now
-            audioFiles: JSON.stringify(audioFiles),
+            audioFiles: JSON.stringify(cleanedAudioFiles),
             audioScript: JSON.stringify(audioScript),
             // ts ignore
             // @ts-ignore
