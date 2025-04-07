@@ -34,7 +34,7 @@
   - [Upload & Convert PDF](#1-upload--convert-pdf)
   - [Podcast Result](#2-podcast-result)
 - [Possible enhancements](#possible-enhancements)
-- [Final Thoughts & Resources](#final-thoughts--resources)
+- [Resources](#resources)
 
 ## Why This Project?
 
@@ -566,7 +566,7 @@ After successful conversion, in the "Your Podcasts" section the user can listen 
 - **Improved UI/UX**: Provide users better controls over file management & audio playback.
 
 
-### Final Thoughts & Resources
+### Resources
 
 - [Project source code](https://github.com/junwatu/griddb-podcast-creator).
-- Links to official APIs documentation: [GridDB Cloud Web API](https://github.com/griddb/webapi/blob/master/GridDB_Web_API_Reference.md), [Mistral OCR](https://docs.mistral.ai/capabilities/document/), [OpenAI TTS](https://platform.openai.com/docs/guides/text-to-speech), [Next.js](https://nextjs.org/docs).
+- [GridDB Cloud Web API](https://github.com/griddb/webapi/blob/master/GridDB_Web_API_Reference.md), [Mistral OCR](https://docs.mistral.ai/capabilities/document/), [OpenAI TTS](https://platform.openai.com/docs/guides/text-to-speech), [Next.js](https://nextjs.org/docs).
