@@ -541,6 +541,8 @@ The code for the user interface resides in a single file, `page.tsx`. It is deve
 
 The user will browse and upload a PDF file. Once the file is selected, the user can click the **Convert to Podcast** button. This action will make the application process the PDF using OCR to extract text and then generate an audio podcast using AI-generated voices.
 
+You can test the application using the sample PDF files available in the `pdfs` directory. These files are sourced from arXiv and contain highly technical content, making them ideal for evaluating the application's capabilities.
+
 ### 2. Podcast Result
 
 ![podcast result](images/podcast-result.png)
