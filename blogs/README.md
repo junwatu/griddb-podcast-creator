@@ -181,8 +181,6 @@ To whitelist the IP, go to the GridDB Cloud Admin and navigate to the **Network 
 
 ### Developing the Next.js Web Interface & API
 
-This application uses Next.js. For the full source code, please look into the repository. 
-
 The main important code is the API route that handles PDF upload and then processes it. This is the snippet code from the `route.ts` file in the `apps/app/api/upload` directory:
 
 ```typescript
