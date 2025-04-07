@@ -545,7 +545,7 @@ The user will browse and upload a PDF file. Once the file is selected, the user 
 
 ![podcast result](images/podcast-result.png)
 
-After successful conversion, in the "Your Podcasts" section the user can listen to the podcast, using the audio player and section list to navigate through the content easily.
+After successful conversion, in the **Your Podcasts** tab the user can listen to the podcast, using the audio player and section list to navigate through the content easily.
 
 
 ## Possible enhancements
