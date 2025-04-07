@@ -71,8 +71,6 @@ The diagram above illustrates the simplified workflow of the AI-powered PDF-to-p
 
 - **GridDB Cloud**: Database for efficiently storing and retrieving parsed PDF text.
 
-----
-
 ## Run the Project
 
 To run this project, you should clone the `apps` directory from this [repository](https://github.com/junwatu/griddb-podcast-creator.git). 
@@ -134,28 +132,152 @@ Mistral API key is needed to use the OCR functionality.
 
 ### Developing the Next.js Web Interface & API
 
-- Describe Next.js frontend UI pages for uploading PDFs and display generated podcasts.
-- Show file upload components and preview components.
+This application use Next.js. For the full source code, please look into the repository. The main important code is the API route that handle PDF upload then process it.
 
-Code snippet example to create Next.js API route:
+This is the snippet code from the `route.ts` file in the `apps/app/api/upload` directory:
 
-```javascript
-// Next.js API route example
-import { NextResponse } from 'next/server';
+```typescript
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
 
-export async function POST(req) {
-  const data = await req.formData();
-  const file = data.get('pdfFile');
+    if (!file) {
+      return NextResponse.json(
+        { error: 'No file uploaded' },
+        { status: 400 }
+      );
+    }
 
-  if (!file) {
-    return NextResponse.json({ error: 'No PDF file uploaded' }, { status: 400 });
+    if (file.type !== 'application/pdf') {
+      return NextResponse.json(
+        { error: 'Invalid file type. Please upload a PDF file' },
+        { status: 400 }
+      );
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: 'File size too large. Maximum size is 10MB' },
+        { status: 400 }
+      );
+    }
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(7);
+    const tempFilename = `upload_${timestamp}_${randomString}.pdf`;
+    const tempFilePath = join(os.tmpdir(), tempFilename);
+
+    await writeFile(tempFilePath, buffer);
+    
+    /** Extracted data from PDF */
+    const { content: pdfContent, response: ocrResponse } = await ocrService.processFile(tempFilePath, file.name);
+    
+    /** Generate script for the audio from the extracted data */
+    const audioScript = await openaiService.generatePodcastScript(pdfContent);
+    
+    /** Generate audio from the script */
+    const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_API_KEY || '', {
+      voice: 'verse',
+      outputDir: audioDir,
+      instructions: instructions,
+      outputFormat: 'mp3',
+    });
+
+    const cleanedAudioFiles = cleanAudioPaths(audioFiles);
+    
+    /** Save the data into GridDB database */
+    const podcastData: GridDBData = {
+      id: generateRandomID(),
+      audioFiles: JSON.stringify(cleanedAudioFiles),
+      audioScript: JSON.stringify(audioScript),
+      // ts ignore
+      // @ts-ignore
+      ocrResponse: JSON.stringify(ocrResponse)
+    }
+
+    const result = await dbClient.insertData({ data: podcastData });
+    
+    return NextResponse.json({
+      message: 'File uploaded successfully',
+      fileName: file.name,
+      fileSize: file.size,
+      tempFilePath: tempFilePath,
+      ocrResponse: ocrResponse,
+      audioFiles: audioFiles,
+      audioScript: audioScript,
+    });
+
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    return NextResponse.json(
+      { error: 'Failed to upload file' },
+      { status: 500 }
+    );
   }
-
-  // Call OCR API and Database storage (handled in next sections)
-
-  return NextResponse.json({ message: 'PDF Uploaded Successfully' });
 }
 ```
+
+Let's look the code in details:
+
+#### 1. **OCR Extraction of PDF Content**  
+
+```typescript
+/** Extracted data from PDF */
+const { content: pdfContent, response: ocrResponse } = await ocrService.processFile(tempFilePath, file.name);
+```
+- **Function:** The temporary PDF file created earlier is sent to an OCR (Optical Character Recognition) service for processing.
+- **Outcome:** OCR extracts textual content (`pdfContent`) from the PDF and provides a detailed response (`ocrResponse`) with metadata, including extraction success, any encountered OCR errors, or issues about content quality which might impact accuracy.
+
+#### 2. **Generating the Podcast Script**  
+
+```typescript
+/** Generate script for the audio from the extracted data */
+const audioScript = await openaiService.generatePodcastScript(pdfContent);
+```
+- **Function:** Pass the extracted textual content (`pdfContent`) to an OpenAI-powered service.
+- **Outcome:** A structured podcast script (`audioScript`) suitable for text-to-speech conversion is generated, optimized for clarity, conversational quality, and audio flow.
+
+#### 3. **Creating Audio from the Generated Script**  
+
+```typescript
+/** Generate audio from the script */
+const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_API_KEY || '', {
+    voice: 'verse',
+    outputDir: audioDir,
+    instructions: instructions,
+    outputFormat: 'mp3',
+});
+```
+- **Function:** Convert the generated podcast script into audio form using an OpenAI text-to-speech API.
+- **Parameters:**
+  - `voice`: Determines vocal style (e.g., 'verse').
+  - `outputDir`: Destination directory for audio files.
+  - `instructions`: Extra refinement or instructional parameters for audio quality.
+  - `outputFormat`: Audio format set as 'mp3'.
+- **Outcome:** Audio segments (`audioFiles`) in MP3 format are generated from the script and stored in the designated output directory.
+
+#### 4. **Saving Data to GridDB Database**  
+```typescript
+/** Save the data into GridDB database */
+const podcastData: GridDBData = {
+    id: generateRandomID(),
+    audioFiles: JSON.stringify(cleanedAudioFiles),
+    audioScript: JSON.stringify(audioScript),
+    // ts ignore
+    // @ts-ignore
+    ocrResponse: JSON.stringify(ocrResponse)
+}
+
+const result = await dbClient.insertData({ data: podcastData });
+```
+- **Function:** Collect and organize processed data (ID, audio files, podcast script, OCR response) into a structured object (`podcastData`) with appropriate type conversions (JSON serialization).
+- **Outcome:** Persistently stores generated audio metadata, associated scripts, and OCR extraction data into the GridDB database, providing future retrieval and management capabilities.
+
+In summary, the main functionality follows a clear sequence from our [system diagram](#introducing-the-ai-powered-pdf-to-podcast-generation-system) before.
 
 ### Integrating OCR using Mistral AI
 
@@ -163,7 +285,7 @@ Mistral OCR is an Optical Character Recognition API that sets a new standard in 
 
 In this project, we will use Mistral OCR to extract text from PDFs. The process involves:
 
-1. Uploading the PDF file to Mistral.
+#### 1. Uploading the PDF file to Mistral.
 
 ```javascript
 const uploaded_pdf = await this.client.files.upload({
@@ -175,7 +297,7 @@ const uploaded_pdf = await this.client.files.upload({
 });
 ```
 
-2. Retrieving the signed URL for the uploaded PDF.
+#### 2. Retrieving the signed URL for the uploaded PDF.
 
 ```javascript
 const signedUrl = await this.client.files.getSignedUrl({
@@ -183,7 +305,7 @@ const signedUrl = await this.client.files.getSignedUrl({
 });
 ```
 
-3. Sending the signed URL to Mistral OCR for text extraction.
+#### 3. Sending the signed URL to Mistral OCR for text extraction.
 
 ```javascript
 const ocrResponse = await this.client.ocr.process({
@@ -245,7 +367,7 @@ We will use the `gpt-4o-mini-tts` model from OpenAI to generate speech from text
 
 We will process the audio in two process based on the schema response from the OpenAI model.
 
-1. Process `introduction`, `conclusion`, and `call_to_action`.
+#### 1. Process `introduction`, `conclusion`, and `call_to_action`.
 
 This code will process introduction, conclusion, and call to action into audio.
 
@@ -277,7 +399,7 @@ This code will process introduction, conclusion, and call to action into audio.
 
 ```
 
-2. Process `main_talking_points`
+#### 2. Process `main_talking_points`
 
 This code will process the main content or talking points into audio.
 
@@ -357,43 +479,14 @@ async function insertData({
 The core code actually just PUT operation on REST route path `/containers/podcasts/rows`. It's so easy to use GridDB on the cloud.
 
 
-### Integrating Entire Workflow End-To-End
-
-- Combine all above steps into one seamless Next.js backend API endpoint:
-
-- Provide frontend example code snippets to filter, preview, and download podcast audio.
-
-----
-
-## Running your Podcast Generator Prototype
-
-- Step-by-step procedure:
-  - Cloning repository
-  - Installing dependencies (`npm install`)
-  - Setting up environment `.env` variables (OpenAI, Mistral OCR, GridDB URLs and Keys)
-  - Running locally: `npm run dev`
-  - Viewing and testing your AI-powered app via browser.
-
-----
-
 ## Possible enhancements
 
 - **Custom Voice Options**: Provide users the option for different voices or accents.
-- **Text summarization for shorter podcasts**: Integrate text summarization AI to create succinct podcast content.
 - **Podcast hosting integration**: Connect your podcasts directly to platforms like Spotify, Apple Podcasts, RSS feeds, etc.
 - **Improved UI/UX**: Provide users better controls over file management & audio playback.
 
-----
-
-## Conclusion
-
-- Summarize how the stack (Next.js, GridDB Cloud, Mistral OCR, and OpenAI TTS) effectively solves manual generation limitations.
-- Encourage developers and organizations to extend this prototype to production-ready deployments.
-
-----
 
 ### Final Thoughts & Resources
 
-- GitHub repository link for demo project code
-- Links to official APIs documentation (GridDB Cloud, Mistral OCR, OpenAI TTS, Next.js)
-- Additional resources for further exploration (blogs, papers, articles, etc.)
+- [Project source code](https://github.com/junwatu/griddb-podcast-creator).
+- Links to official APIs documentation: [GridDB Cloud Web API](https://github.com/griddb/webapi/blob/master/GridDB_Web_API_Reference.md), [Mistral OCR](https://docs.mistral.ai/capabilities/document/), [OpenAI TTS](https://platform.openai.com/docs/guides/text-to-speech), [Next.js](https://nextjs.org/docs).
