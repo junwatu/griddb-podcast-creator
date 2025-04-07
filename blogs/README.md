@@ -4,8 +4,6 @@
 
 ## Quick Links
 
-## Quick Links
-
 - [Introduction](#why-this-project)
 - [Problem & Why This Matter](#problem--why-this-matters)
 - [Introducing the AI-powered PDF-to-Podcast Generation System](#introducing-the-ai-powered-pdf-to-podcast-generation-system)
