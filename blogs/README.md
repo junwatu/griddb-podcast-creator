@@ -132,7 +132,7 @@ Create the OpenAI API key [here](https://platform.openai.com/). You may need cre
 
 ![openai models](images/enabled-openai-models.png)
 
-However, in this project, we will use two AI models from OpenAI:
+In this project, we will use two AI models from OpenAI:
 
 - `gpt-4o` to create audio script.
 - `gpt-4o-mini-tts` for generating audio from the script. 
