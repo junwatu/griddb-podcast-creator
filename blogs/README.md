@@ -26,7 +26,7 @@
     - [Creating Audio from the Generated Script](#3-creating-audio-from-the-generated-script)
     - [Saving Data to GridDB Database](#4-saving-data-to-griddb-database)
   - [Integrating OCR using Mistral AI](#integrating-ocr-using-mistral-ai)
-  - [Get PDF key points and summarization](#get-pdf-key-points-and-summarization)
+  - [Get PDF key points and summarization using OpenAI](#get-pdf-key-points-and-summarization-using-openai)
   - [Generating Podcast using OpenAI TTS](#generating-podcast-using-openai-tts)
   - [Storing Data to GridDB Cloud](#storing-data-to-griddb-cloud)
 - [User Interface](#user-interface)
@@ -368,7 +368,7 @@ const ocrResponse = await this.client.ocr.process({
 });
 ```
 
-### Get PDF key points and summarization
+### Get PDF key points and summarization using OpenAI
 
 We won't convert all the content of the PDF extraction text because it will be to long. The best way is to summarize and get the key points of the extraction data. For this task, we will use the `gpt-4o` model.
 
