@@ -38,9 +38,9 @@ Turning PDFs into practical, engaging podcasts manually presents several challen
 ### Issues in Managing and Storing PDF Content
 
 - Storing large volumes of PDFs manually quickly becomes unmanageable.
-Difficulties arise in tracking versions, accessing historical files, and efficiently retrieving information.
+Difficulties include tracking versions, accessing historical files, and efficiently retrieving information.
 - Without structured storage, repurposing or updating previous podcast episodes becomes inefficient and time-consuming.
-- Leveraging an AI-powered podcast solution effectively addresses these challenges by quickly converting PDFs into simplified, listener-friendly audio content—greatly improving productivity and audience engagement.
+- Leveraging an AI-powered podcast solution effectively addresses these challenges by quickly converting PDFs into simplified, listener-friendly audio content—significantly improving productivity and audience engagement.
 
 
 ## Introducing the AI-powered PDF-to-Podcast Generation System
@@ -57,13 +57,13 @@ The diagram above illustrates the simplified workflow of the AI-powered PDF-to-p
 
 4. **Convert Text to Podcast (OpenAI TTS)**: OpenAI's Text-to-Speech converts the summarized text into natural, engaging audio.
 
-5. **Store Data (GridDB Cloud)**: The summarized text and associated data are efficiently stored in GridDB Cloud for future retrieval.
+5. **Store Data (GridDB Cloud)**: The summarized text and associated data are efficiently stored in the GridDB Cloud for future retrieval.
 
 6. **Podcast Playback**: Users access the simplified, engaging podcast directly for convenient listening.
 
 ### Main AI Tools & Stack Used
 
-- **Next.js**: Web framework for building the user-interface and the API layer.
+- **Next.js**: Web framework for building the user interface and the API layer.
 
 - **Mistral OCR AI**: OCR model for high-quality, accurate PDF-to-text conversion.
 
@@ -82,7 +82,7 @@ cd apps
 npm install
 ```
 
-Create an `.env` file for the project credentials with these keys:
+Create a `.env` file for the project credentials with these keys:
 
 ```ini
 MISTRAL_API_KEY=
@@ -92,7 +92,7 @@ GRIDDB_PASSWORD=
 GRIDDB_USERNAME=
 ```
 
-You need the Mistral API key for OCR functionality, OpenAI key for the text to speech (TTS) conversion and GridDB keys for the data storage. Please, look in this [section](#prerequisites) on how to get those keys.
+You need the Mistral API key for OCR functionality, the OpenAI key for the text-to-speech (TTS) conversion, and GridDB keys for the data storage. Please, look in this [section](#prerequisites) on how to get those keys.
 
 Run the project using this command:
 
@@ -113,16 +113,16 @@ Browse for the PDF file and click the **Convert to Podcast** button to generate 
 
 ### Node.js
 
-You need Node.js installed because this project use Next.js. Install it the Node LTS version from [here](https://nodejs.org/id/download).
+You need Node.js installed because this project uses Next.js. Install the Node LTS version from [here](https://nodejs.org/id/download).
 
 
 ### Mistral OCR API Setup
 
-Mistral API key is needed to use the OCR functionality. Create the API key [here](https://console.mistral.ai/api-keys).
+A Mistral API key is needed to use the OCR functionality. Create the API key [here](https://console.mistral.ai/api-keys).
 
 ### OpenAI API Setup
 
-Creat the OpenAI API key [here](https://platform.openai.com/). You may need create a project and enable few models.
+Create the OpenAI API key [here](https://platform.openai.com/). You may need create a project and enable few models.
 
 ![openai models](images/enabled-openai-models.png)
 
@@ -177,9 +177,9 @@ To whitelist the IP, go to the GridDB Cloud Admin and navigate to the **Network 
 
 ### Developing the Next.js Web Interface & API
 
-This application use Next.js. For the full source code, please look into the repository. 
+This application uses Next.js. For the full source code, please look into the repository. 
 
-The main important code is the API route that handle PDF upload then process it. This is the snippet code from the `route.ts` file in the `apps/app/api/upload` directory:
+The main important code is the API route that handles PDF upload and then processes it. This is the snippet code from the `route.ts` file in the `apps/app/api/upload` directory:
 
 ```typescript
 export async function POST(request: NextRequest) {
@@ -189,25 +189,25 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { error: 'No file uploaded' },
-        { status: 400 }
-      );
-    }
+ { error: 'No file uploaded' },
+ { status: 400 }
+ );
+ }
 
     if (file.type !== 'application/pdf') {
       return NextResponse.json(
-        { error: 'Invalid file type. Please upload a PDF file' },
-        { status: 400 }
-      );
-    }
+ { error: 'Invalid file type. Please upload a PDF file' },
+ { status: 400 }
+ );
+ }
 
     const maxSize = 10 * 1024 * 1024; // 10MB in bytes
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'File size too large. Maximum size is 10MB' },
-        { status: 400 }
-      );
-    }
+ { error: 'File size too large. Maximum size is 10MB' },
+ { status: 400 }
+ );
+ }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
       outputDir: audioDir,
       instructions: instructions,
       outputFormat: 'mp3',
-    });
+ });
 
     const cleanedAudioFiles = cleanAudioPaths(audioFiles);
     
@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
       // ts ignore
       // @ts-ignore
       ocrResponse: JSON.stringify(ocrResponse)
-    }
+ }
 
     const result = await dbClient.insertData({ data: podcastData });
     
@@ -254,19 +254,19 @@ export async function POST(request: NextRequest) {
       ocrResponse: ocrResponse,
       audioFiles: audioFiles,
       audioScript: audioScript,
-    });
+ });
 
-  } catch (error) {
+ } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file' },
-      { status: 500 }
-    );
-  }
+ { error: 'Failed to upload file' },
+ { status: 500 }
+ );
+ }
 }
 ```
 
-Let's look the code in details:
+Let's look at the code in detail:
 
 #### 1. **OCR Extraction of PDF Content**  
 
@@ -275,7 +275,7 @@ Let's look the code in details:
 const { content: pdfContent, response: ocrResponse } = await ocrService.processFile(tempFilePath, file.name);
 ```
 - **Function:** The temporary PDF file created earlier is sent to an OCR (Optical Character Recognition) service for processing.
-- **Outcome:** OCR extracts textual content (`pdfContent`) from the PDF and provides a detailed response (`ocrResponse`) with metadata, including extraction success, any encountered OCR errors, or issues about content quality which might impact accuracy.
+- **Outcome:** OCR extracts textual content (`pdfContent`) from the PDF and provides a detailed response (`ocrResponse`) with metadata, including extraction success, any encountered OCR errors, or issues about content quality that might impact accuracy.
 
 #### 2. **Generating the Podcast Script**  
 
@@ -337,7 +337,7 @@ const uploaded_pdf = await this.client.files.upload({
     file: {
         fileName: fileName,
         content: file,
-    },
+ },
     purpose: "ocr"
 });
 ```
@@ -358,40 +358,40 @@ const ocrResponse = await this.client.ocr.process({
     document: {
         type: "document_url",
         documentUrl: signedUrl.url,
-    }
+ }
 });
 ```
 
-### Get PDF Keypoints and Summarization
+### Get PDF key points and summarization
 
-We won't convert all the content of the PDF extraction text because it will be to long. The best way is to summarize and get the key points od the extraction data. For this task, we will use `gpt-4o` model.
+We won't convert all the content of the PDF extraction text because it will be to long. The best way is to summarize and get the key points of the extraction data. For this task, we will use the `gpt-4o` model.
 
-This is the system prompt to extract meaningfull data from PDF's extracted data:
+This is the system prompt to extract meaningful data from PDF's extracted data:
 
 ```txt
 Create a 5-minute podcast episode script in a conversational style, using the content provided.\n\nInclude the following elements:\n\n- **Introduction**: Engage your audience with an intriguing opening statement related to the topic. Capture their attention immediately.\n\n- **Main Talking Points**: Develop 3-4 main sections discussing the central ideas or arguments. Use relatable examples and personal stories for better understanding. Maintain a conversational tone, as if you are speaking directly to the listener. Ensure natural transitions between sections to keep the flow.\n\n- **Conclusion**: Summarize the key takeaways in a concise manner, making sure to leave a lasting impression.\n\n- **Call to Action**: End with a clear and compelling call to action encouraging listeners to engage further or reflect on the topic.\n\n# Output Format\n\nWrite the script in a conversational and engaging narrative suitable for a podcast. Each section should integrate seamlessly with transitions, emulate a direct speaking style to engage the listener, and reinforce the message.\n\n# Examples\n\n**Introduction**: \"Welcome to [Podcast Name]. Today, we're diving into [Topic]. Have you ever wondered...?\"\n\n**Main Talking Points**:\n\n1. \"Let's start with [Main Idea]. It's like when...\"\n2. \"Moving on to [Next Idea], consider how...\"\n3. \"Finally, when we talk about [Final Idea], there's a story about...\"\n\n**Conclusion**: \"So, as we've learned today, [Key Takeaway 1], [Key Takeaway 2]...\"\n\n**Call to Action**: \"Think about how you can [Action]. Join us next time when we explore...\"\n\n# Notes\n\n- The script should be written to cater both to novices and those with some prior knowledge.\n- Ensure it resonates intellectually and stimulates curiosity among listeners.\n- Use transition words to guide listeners smoothly from one idea to the next.
 ```
 
-To keep the response consistent, we can use schema feature. So, basically, we can force the AI model response to match predefined data structure or schema:
+To keep the response consistent, we can use the schema feature. So, basically, we can force the AI model response to match a predefined data structure or schema:
 
 
 ```json
 {
   "introduction": "Welcome to our podcast! Today, we're exploring how AI can revolutionize the way we consume content by transforming PDFs into engaging audio podcasts. Have you ever wished you could listen to your documents instead of reading them? Let's dive in!",
   "main_talking_points": [
-    {
+ {
       "title": "The Challenges of Manual PDF-to-Podcast Conversion",
       "content": "Manually converting PDFs into podcasts is a tedious process. It involves extracting text, summarizing complex content, and recording audio—all of which take significant time and effort. AI simplifies this by automating these steps, saving you hours of work."
-    },
-    {
+ },
+ {
       "title": "How AI Simplifies the Process",
       "content": "AI tools like Mistral OCR and OpenAI TTS streamline the workflow. Mistral OCR extracts text from PDFs with high accuracy, while OpenAI's models summarize and convert the text into natural-sounding audio. This ensures a seamless and efficient process."
-    },
-    {
+ },
+ {
       "title": "The Role of GridDB in Managing Data",
       "content": "GridDB Cloud acts as a robust storage solution for parsed text and audio files. It ensures that your data is organized, easily retrievable, and ready for future use, making the entire system scalable and efficient."
-    }
-  ],
+ }
+ ],
   "conclusion": "In summary, AI-powered tools are transforming the way we interact with content. By automating the conversion of PDFs into podcasts, we save time, enhance accessibility, and create a more engaging learning experience.",
   "call_to_action": "Think about how you can leverage this technology in your own projects. Visit our GitHub repository to get started, and don't forget to share your feedback!"
 }
@@ -404,17 +404,17 @@ The `gpt-4o` will response data with these keys:
 - `conclusion`
 - `call_to_action`
 
-With these format then it will be easier to convert the text to audio for out podcast application.
+With this format then it will be easier to convert the text to audio for our podcast application.
 
 ### Generating Podcast using OpenAI TTS
 
-We will use the `gpt-4o-mini-tts` model from OpenAI to generate speech from text. This model capable to control the voice of your generated audio with additional [instructions](https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-instructions).
+We will use the `gpt-4o-mini-tts` model from OpenAI to generate speech from text. This model is capable of controlling the voice of your generated audio with additional [instructions](https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-instructions).
 
-We will process the audio in two process based on the schema response from the OpenAI model.
+We will process the audio in two processes based on the schema response from the OpenAI model.
 
 #### 1. Process `introduction`, `conclusion`, and `call_to_action`.
 
-This code will process introduction, conclusion, and call to action into audio.
+This code will process the introduction, conclusion, and call to action into audio.
 
 ```javascript
   const simpleKeys = ['introduction', 'conclusion', 'call_to_action'] as const;
@@ -430,17 +430,17 @@ This code will process introduction, conclusion, and call to action into audio.
         voice,
         instructions,
         input: text
-      });
+ });
 
       const buffer = Buffer.from(await response.arrayBuffer());
       fs.writeFileSync(speechFile, buffer);
 
       audioFiles[key] = speechFile;
-    } catch (error) {
+ } catch (error) {
       console.error(`Error processing ${key}:`, error);
       throw error;
-    }
-  }
+ }
+ }
 
 ```
 
@@ -464,17 +464,17 @@ This code will process the main content or talking points into audio.
           voice,
           instructions,
           input: text
-        });
+ });
 
         const buffer = Buffer.from(await response.arrayBuffer());
         fs.writeFileSync(speechFile, buffer);
 
         audioFiles[`talking_point_${i}`] = speechFile;
-      } catch (error) {
+ } catch (error) {
         console.error(`Error processing talking point ${i}:`, error);
         throw error;
-      }
-    }
+ }
+ }
 ```
 
 ### Storing Data to GridDB Cloud
@@ -483,14 +483,14 @@ The column data or schema for the GridDB database is simple:
 
 ```ts
 export interface GridDBData {
-	id: string | number;
-	ocrResponse: Blob;
-	audioScript: string;
-	audioFiles: string;
+  id: string | number;
+  ocrResponse: Blob;
+  audioScript: string;
+  audioFiles: string;
 }
 ```
 
-Then to saving data to the GridDB, in this project the code is in `insertData` function:
+Then to save data to the GridDB, in this project the code is in the `insertData` function:
 
 ```javascript
 async function insertData({
@@ -507,23 +507,39 @@ async function insertData({
       data.ocrResponse,
       data.audioScript,
       data.audioFiles,
-    ];
+ ];
 
     const path = `/containers/${containerName}/rows`;
     return await makeRequest(path, [row], 'PUT');
-  } catch (error) {
+ } catch (error) {
     if (error instanceof GridDBError) {
       throw error;
-    }
+ }
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     throw new GridDBError(`Failed to insert data: ${errorMessage}`, undefined, undefined, error);
-  }
+ }
 }
 ```
 
 The core code actually just PUT operation on REST route path `/containers/podcasts/rows`. It's so easy to use GridDB on the cloud.
 
 The full source code for saving data into GridDB is in the `apps/app/lib/griddb.ts` file. This file later will be used in the `route.ts` file use ase API.
+
+## User Interface
+
+The user interface is built with React and Shadcn components. It has two main tabs:
+
+### 1. Upload & Convert Interface
+
+![podcast ui](images/pdf-to-podcast.png)
+
+The user will browse and upload a PDF file. Once the file is selected, the user can click the **Convert to Podcast** button. This action will make the application process the PDF using OCR to extract text and then generate an audio podcast using AI-generated voices.
+
+### 2. Podcast Result
+
+![podcast result](images/podcast-result.png)
+
+After successful conversion, in the "Your Podcasts" section the user can listen to the podcast, using the audio player and section list to navigate through the content easily.
 
 
 ## Possible enhancements
