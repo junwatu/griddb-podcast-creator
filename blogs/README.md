@@ -533,7 +533,7 @@ The full source code for saving data into GridDB is in the `apps/app/lib/griddb.
 
 ## User Interface
 
-The user interface is built with React and Shadcn components. It has two main tabs:
+The code for the user interface resides in a single file, `page.tsx`. It is developed using React and Shadcn components, featuring two primary tabs:
 
 ### 1. Upload & Convert PDF
 
