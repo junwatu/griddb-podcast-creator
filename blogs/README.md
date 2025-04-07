@@ -77,16 +77,6 @@ The diagram above illustrates the simplified workflow of the AI-powered PDF-to-p
 
 6. **Podcast Playback**: Users access the simplified, engaging podcast directly for convenient listening.
 
-### Main AI Tools & Stack Used
-
-- **Next.js**: Web framework for building the user interface and the API layer.
-
-- **Mistral OCR AI**: OCR model for high-quality, accurate PDF-to-text conversion.
-
-- **OpenAI TTS**: High-quality, lifelike speech synthesis for converting extracted text to audio.
-
-- **GridDB Cloud**: Database for efficiently storing and retrieving parsed PDF text.
-
 ## Run the Project
 
 To run this project, you should clone the `apps` directory from this [repository](https://github.com/junwatu/griddb-podcast-creator.git). 
