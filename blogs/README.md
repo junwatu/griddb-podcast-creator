@@ -191,25 +191,25 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
- { error: 'No file uploaded' },
- { status: 400 }
- );
- }
+        { error: 'No file uploaded' },
+        { status: 400 }
+      );
+    }
 
     if (file.type !== 'application/pdf') {
       return NextResponse.json(
- { error: 'Invalid file type. Please upload a PDF file' },
- { status: 400 }
- );
- }
+        { error: 'Invalid file type. Please upload a PDF file' },
+        { status: 400 }
+      );
+    }
 
     const maxSize = 10 * 1024 * 1024; // 10MB in bytes
     if (file.size > maxSize) {
       return NextResponse.json(
- { error: 'File size too large. Maximum size is 10MB' },
- { status: 400 }
- );
- }
+        { error: 'File size too large. Maximum size is 10MB' },
+        { status: 400 }
+      );
+    }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -219,35 +219,34 @@ export async function POST(request: NextRequest) {
     const tempFilePath = join(os.tmpdir(), tempFilename);
 
     await writeFile(tempFilePath, buffer);
-    
-    /** Extracted data from PDF */
+
+    // Extract data from PDF
     const { content: pdfContent, response: ocrResponse } = await ocrService.processFile(tempFilePath, file.name);
-    
-    /** Generate script for the audio from the extracted data */
+
+    // Generate script for the audio from the extracted data
     const audioScript = await openaiService.generatePodcastScript(pdfContent);
-    
-    /** Generate audio from the script */
+
+    // Generate audio from the script
     const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_API_KEY || '', {
       voice: 'verse',
       outputDir: audioDir,
       instructions: instructions,
       outputFormat: 'mp3',
- });
+    });
 
     const cleanedAudioFiles = cleanAudioPaths(audioFiles);
-    
-    /** Save the data into GridDB database */
+
+    // Save the data into GridDB database
     const podcastData: GridDBData = {
       id: generateRandomID(),
       audioFiles: JSON.stringify(cleanedAudioFiles),
       audioScript: JSON.stringify(audioScript),
-      // ts ignore
       // @ts-ignore
-      ocrResponse: JSON.stringify(ocrResponse)
- }
+      ocrResponse: JSON.stringify(ocrResponse),
+    };
 
     const result = await dbClient.insertData({ data: podcastData });
-    
+
     return NextResponse.json({
       message: 'File uploaded successfully',
       fileName: file.name,
@@ -256,15 +255,14 @@ export async function POST(request: NextRequest) {
       ocrResponse: ocrResponse,
       audioFiles: audioFiles,
       audioScript: audioScript,
- });
-
- } catch (error) {
+    });
+  } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
- { error: 'Failed to upload file' },
- { status: 500 }
- );
- }
+      { error: 'Failed to upload file' },
+      { status: 500 }
+    );
+  }
 }
 ```
 
@@ -276,8 +274,8 @@ Let's look at the code in detail:
 /** Extracted data from PDF */
 const { content: pdfContent, response: ocrResponse } = await ocrService.processFile(tempFilePath, file.name);
 ```
-- **Function:** The temporary PDF file created earlier is sent to an OCR (Optical Character Recognition) service for processing.
-- **Outcome:** OCR extracts textual content (`pdfContent`) from the PDF and provides a detailed response (`ocrResponse`) with metadata, including extraction success, any encountered OCR errors, or issues about content quality that might impact accuracy.
+- **Function:** The uploaded PDF file is sent to an OCR (Optical Character Recognition) service for processing.
+- **Outcome:** Mistral OCR extracts textual content from the PDF and provides a full response (`ocrResponse`) and the PDF content (`pdfContent`).
 
 #### 2. **Generating the Podcast Script**  
 
@@ -286,7 +284,7 @@ const { content: pdfContent, response: ocrResponse } = await ocrService.processF
 const audioScript = await openaiService.generatePodcastScript(pdfContent);
 ```
 - **Function:** Pass the extracted textual content (`pdfContent`) to an OpenAI-powered service.
-- **Outcome:** A structured podcast script (`audioScript`) suitable for text-to-speech conversion is generated, optimized for clarity, conversational quality, and audio flow.
+- **Outcome:** A structured podcast script (`audioScript`) suitable for text-to-speech conversion.
 
 #### 3. **Creating Audio from the Generated Script**  
 
@@ -302,10 +300,10 @@ const audioFiles = await generatePodcastAudio(audioScript, process.env.OPENAI_AP
 - **Function:** Convert the generated podcast script into audio form using an OpenAI text-to-speech API.
 - **Parameters:**
   - `voice`: Determines vocal style (e.g., 'verse').
-  - `outputDir`: Destination directory for audio files.
+  - `outputDir`: The destination directory for audio files. In this project, it is set to the `public/audio` directory.
   - `instructions`: Extra refinement or instructional parameters for audio quality.
   - `outputFormat`: Audio format set as 'mp3'.
-- **Outcome:** Audio segments (`audioFiles`) in MP3 format are generated from the script and stored in the designated output directory.
+- **Outcome:** The data location of audio segments (`audioFiles`).
 
 #### 4. **Saving Data to GridDB Database**  
 ```typescript
@@ -321,7 +319,7 @@ const podcastData: GridDBData = {
 
 const result = await dbClient.insertData({ data: podcastData });
 ```
-- **Function:** Collect and organize processed data (ID, audio files, podcast script, OCR response) into a structured object (`podcastData`) with appropriate type conversions (JSON serialization).
+- **Function:** Collect and organize processed data (ID, audio files, podcast script, OCR response) into a structured object (`podcastData`) with appropriate type conversions (JSON serialization) to match the GridDB data schema.
 - **Outcome:** Persistently stores generated audio metadata, associated scripts, and OCR extraction data into the GridDB database, providing future retrieval and management capabilities.
 
 In summary, the main functionality follows a clear sequence from our [system diagram](#introducing-the-ai-powered-pdf-to-podcast-generation-system) before.
@@ -336,11 +334,11 @@ In this project, we will use Mistral OCR to extract text from PDFs. The process 
 
 ```javascript
 const uploaded_pdf = await this.client.files.upload({
-    file: {
-        fileName: fileName,
-        content: file,
- },
-    purpose: "ocr"
+  file: {
+    fileName: fileName,
+    content: file,
+  },
+  purpose: "ocr",
 });
 ```
 
@@ -364,11 +362,13 @@ const ocrResponse = await this.client.ocr.process({
 });
 ```
 
+This final step will yield a complete OCR data response from Mistral.
+
 ### Get PDF key points and summarization using OpenAI
 
 We won't convert all the content of the PDF extraction text because it will be to long. The best way is to summarize and get the key points of the extraction data. For this task, we will use the `gpt-4o` model.
 
-This is the system prompt to extract meaningful data from PDF's extracted data:
+This is the system prompt to extract meaningful content from PDF's extracted data:
 
 ```txt
 Create a 5-minute podcast episode script in a conversational style, using the content provided.\n\nInclude the following elements:\n\n- **Introduction**: Engage your audience with an intriguing opening statement related to the topic. Capture their attention immediately.\n\n- **Main Talking Points**: Develop 3-4 main sections discussing the central ideas or arguments. Use relatable examples and personal stories for better understanding. Maintain a conversational tone, as if you are speaking directly to the listener. Ensure natural transitions between sections to keep the flow.\n\n- **Conclusion**: Summarize the key takeaways in a concise manner, making sure to leave a lasting impression.\n\n- **Call to Action**: End with a clear and compelling call to action encouraging listeners to engage further or reflect on the topic.\n\n# Output Format\n\nWrite the script in a conversational and engaging narrative suitable for a podcast. Each section should integrate seamlessly with transitions, emulate a direct speaking style to engage the listener, and reinforce the message.\n\n# Examples\n\n**Introduction**: \"Welcome to [Podcast Name]. Today, we're diving into [Topic]. Have you ever wondered...?\"\n\n**Main Talking Points**:\n\n1. \"Let's start with [Main Idea]. It's like when...\"\n2. \"Moving on to [Next Idea], consider how...\"\n3. \"Finally, when we talk about [Final Idea], there's a story about...\"\n\n**Conclusion**: \"So, as we've learned today, [Key Takeaway 1], [Key Takeaway 2]...\"\n\n**Call to Action**: \"Think about how you can [Action]. Join us next time when we explore...\"\n\n# Notes\n\n- The script should be written to cater both to novices and those with some prior knowledge.\n- Ensure it resonates intellectually and stimulates curiosity among listeners.\n- Use transition words to guide listeners smoothly from one idea to the next.
@@ -406,7 +406,7 @@ The `gpt-4o` will response data with these keys:
 - `conclusion`
 - `call_to_action`
 
-With this format then it will be easier to convert the text to audio for our podcast application.
+With this format then it will be easier to convert the text to audio for our podcast application. For more information about the data schema code, please look into the `openai.ts` file in `apps\app\lib` folder.
 
 ### Generating Podcast using OpenAI TTS
 
