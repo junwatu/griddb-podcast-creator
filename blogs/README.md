@@ -9,7 +9,6 @@
 - [Introduction](#why-this-project)
 - [Problem & Why This Matter](#problem--why-this-matters)
 - [Introducing the AI-powered PDF-to-Podcast Generation System](#introducing-the-ai-powered-pdf-to-podcast-generation-system)
-  - [Main AI Tools & Stack Used](#main-ai-tools--stack-used)
 - [Run the Project](#run-the-project)
 - [Prerequisites](#prerequisites)
   - [Node.js](#nodejs)
