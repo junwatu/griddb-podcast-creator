@@ -523,7 +523,7 @@ async function insertData({
 
 The core code actually just PUT operation on REST route path `/containers/podcasts/rows`. It's so easy to use GridDB on the cloud.
 
-The full source code for saving data into GridDB is in the `apps/app/lib/griddb.ts` file. This file later will be used in the `route.ts` file use ase API.
+The full source code for saving data into GridDB is in the `apps/app/lib/griddb.ts` file. This file later will be used in the `route.ts` file as an API.
 
 ## User Interface
 
