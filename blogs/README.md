@@ -92,7 +92,7 @@ GRIDDB_PASSWORD=
 GRIDDB_USERNAME=
 ```
 
-You need the Mistral API key for OCR functionality, OpenAI key for the text to speech (TTS) conversion and GridDB keys for the data storage.
+You need the Mistral API key for OCR functionality, OpenAI key for the text to speech (TTS) conversion and GridDB keys for the data storage. Please, look in this [section](#prerequisites) on how to get those keys.
 
 Run the project using this command:
 
@@ -111,30 +111,75 @@ Browse for the PDF file and click the **Convert to Podcast** button to generate 
 
 ## Prerequisites
 
+### Node.js
+
+You need Node.js installed because this project use Next.js. Install it the Node LTS version from [here](https://nodejs.org/id/download).
+
 
 ### Mistral OCR API Setup
 
-Mistral API key is needed to use the OCR functionality. 
+Mistral API key is needed to use the OCR functionality. Create the API key [here](https://console.mistral.ai/api-keys).
 
-### OpenAI TTS API Setup
+### OpenAI API Setup
 
-- How to obtain OpenAI API keys.
-- Quick start on using OpenAI's TTS models.
+Creat the OpenAI API key [here](https://platform.openai.com/). You may need create a project and enable few models.
+
+![openai models](images/enabled-openai-models.png)
+
+However, in this project, we will use two AI models from OpenAI:
+
+- `gpt-4o` to create audio script.
+- `gpt-4o-mini-tts` for generating audio from the script. 
 
 ### GridDB Cloud Setup
 
-- Explanation of GridDB Cloud purpose in our setup: managing parsed text data for easy retrieval and regeneration.
-- Quick-start link & credentials guide.
+The GridDB Cloud offers a free plan tier and is officially available worldwide.
 
-----
+You need these GridDB environment variables in the `.env` file:
+
+```ini
+GRIDDB_WEBAPI_URL=
+GRIDDB_USERNAME=
+GRIDDB_PASSWORD=
+```
+
+
+#### Sign Up for GridDB Cloud Free Plan
+
+If you would like to sign up for a GridDB Cloud Free instance, you can do so in the following link: [https://form.ict-toshiba.jp/download_form_griddb_cloud_freeplan_e](https://form.ict-toshiba.jp/download_form_griddb_cloud_freeplan_e).
+
+After successfully signing up, you will receive a free instance along with the necessary details to access the GridDB Cloud Management GUI, including the **GridDB Cloud Portal URL**, **Contract ID**, **Login**, and **Password**.
+
+#### GridDB WebAPI URL
+
+Go to the GridDB Cloud Portal and copy the WebAPI URL from the **Clusters** section. It should look like this:
+
+![GridDB Portal](images/griddb-cloud-portal.png)
+
+#### GridDB Username and Password
+
+Go to the **GridDB Users** section of the GridDB Cloud portal and create or copy the username for `GRIDDB_USERNAME`. The password is set when the user is created for the first time, use this as the `GRIDDB_PASSWORD`.
+
+![GridDB Users](images/griddb-cloud-users.png)
+
+For more details, to get started with GridDB Cloud, please follow this [quick start guide](https://griddb.net/en/blog/griddb-cloud-quick-start-guide/).
+
+#### IP Whitelist
+When running this project, please ensure that the IP address where the project is running is whitelisted. Failure to do so will result in a 403 status code or forbidden access.
+
+You can use a website like [What Is My IP Address](https://whatismyipaddress.com/) to find your public IP address.
+
+To whitelist the IP, go to the GridDB Cloud Admin and navigate to the **Network Access** menu.
+
+![ip whitelist](images/ip-whitelist.png)
 
 ## Building the Podcast Generator Step-by-Step
 
 ### Developing the Next.js Web Interface & API
 
-This application use Next.js. For the full source code, please look into the repository. The main important code is the API route that handle PDF upload then process it.
+This application use Next.js. For the full source code, please look into the repository. 
 
-This is the snippet code from the `route.ts` file in the `apps/app/api/upload` directory:
+The main important code is the API route that handle PDF upload then process it. This is the snippet code from the `route.ts` file in the `apps/app/api/upload` directory:
 
 ```typescript
 export async function POST(request: NextRequest) {
@@ -434,7 +479,7 @@ This code will process the main content or talking points into audio.
 
 ### Storing Data to GridDB Cloud
 
-The column data for the GridDB database is simple:
+The column data or schema for the GridDB database is simple:
 
 ```ts
 export interface GridDBData {
@@ -477,6 +522,8 @@ async function insertData({
 ```
 
 The core code actually just PUT operation on REST route path `/containers/podcasts/rows`. It's so easy to use GridDB on the cloud.
+
+The full source code for saving data into GridDB is in the `apps/app/lib/griddb.ts` file. This file later will be used in the `route.ts` file use ase API.
 
 
 ## Possible enhancements
