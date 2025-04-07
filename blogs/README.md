@@ -2,45 +2,62 @@
 
 ![cover](images/cover.jpg)
 
-## Introduction
+## Quick Links
 
-Podcasts have become a favorite way for people to learn and consume content while going about their daily activities. Whether you're commuting, exercising, or doing household chores, podcasts let you learn hands-free.
+## Quick Links
 
-Key benefits of podcast learning:
-- Listen while doing other tasks
-- Learn at your own pace
-- Perfect for busy professionals
-- More engaging than reading long documents
-- Great for auditory learners
+- [Introduction](#why-this-project)
+- [Problem & Why This Matter](#problem--why-this-matters)
+- [Introducing the AI-powered PDF-to-Podcast Generation System](#introducing-the-ai-powered-pdf-to-podcast-generation-system)
+  - [Main AI Tools & Stack Used](#main-ai-tools--stack-used)
+- [Run the Project](#run-the-project)
+- [Prerequisites](#prerequisites)
+  - [Node.js](#nodejs)
+  - [Mistral OCR API Setup](#mistral-ocr-api-setup)
+  - [OpenAI API Setup](#openai-api-setup)
+  - [GridDB Cloud Setup](#griddb-cloud-setup)
+    - [Sign Up for GridDB Cloud Free Plan](#sign-up-for-griddb-cloud-free-plan)
+    - [GridDB WebAPI URL](#griddb-webapi-url)
+    - [GridDB Username and Password](#griddb-username-and-password)
+    - [IP Whitelist](#ip-whitelist)
+- [Building the Podcast Generator](#building-the-podcast-generator)
+  - [Developing the Next.js Web Interface & API](#developing-the-nextjs-web-interface--api)
+    - [OCR Extraction of PDF Content](#1-ocr-extraction-of-pdf-content)
+    - [Generating the Podcast Script](#2-generating-the-podcast-script)
+    - [Creating Audio from the Generated Script](#3-creating-audio-from-the-generated-script)
+    - [Saving Data to GridDB Database](#4-saving-data-to-griddb-database)
+  - [Integrating OCR using Mistral AI](#integrating-ocr-using-mistral-ai)
+  - [Get PDF key points and summarization](#get-pdf-key-points-and-summarization)
+  - [Generating Podcast using OpenAI TTS](#generating-podcast-using-openai-tts)
+  - [Storing Data to GridDB Cloud](#storing-data-to-griddb-cloud)
+- [User Interface](#user-interface)
+  - [Upload & Convert PDF](#1-upload--convert-pdf)
+  - [Podcast Result](#2-podcast-result)
+- [Possible enhancements](#possible-enhancements)
+- [Final Thoughts & Resources](#final-thoughts--resources)
 
-However, converting existing PDF documents into podcasts can be time-consuming and complex. That's where AI-powered solution comes in - it will transform PDFs into clear, natural-sounding podcasts.
+## Why This Project?
 
-## Problems with Converting PDFs to Podcasts Manually
+Turn your complex PDFs into clear, natural-sounding AI-powered podcasts instantly. Ideal for busy professionals, auditory learners, and passive learning workflows.
 
-Turning PDFs into practical, engaging podcasts manually presents several challenges that affect productivity and listener experience:
+Core Benefits:
 
-### Slow and Tedious Text Extraction
+- Hands-free learning, ideal during commutes or chores.
 
-- Manual copy-pasting from PDFs is time-consuming, especially with large or complicated documents.
+- Easily transforms technical PDFs into engaging audio.
 
-- PDFs often contain complex structures (tables, columns, charts), causing extraction errors.
+- Drastically reduces content-creation time.
 
-- Correcting errors after manual extraction adds extra workflow overhead.
+## Problem & Why This Matters
 
-### Difficulties in Simplifying Complex PDF Content
+Converting PDFs manually is tedious:
 
-- Dense, technical PDF documents require careful manual summarization to become understandable for broader audiences.
+- Difficult text extraction from PDFs.
+- Complex manual summarization and audio recording overhead.
+- Messy PDF management/storage.
 
-- Manually rewriting complex ideas into simple language is labor-intensive, context-dependent, and prone to inconsistencies.
 
-- Without automated summarization, maintaining a consistent tone and ensuring clarity for listeners becomes challenging.
-
-### Issues in Managing and Storing PDF Content
-
-- Storing large volumes of PDFs manually quickly becomes unmanageable.
-Difficulties include tracking versions, accessing historical files, and efficiently retrieving information.
-- Without structured storage, repurposing or updating previous podcast episodes becomes inefficient and time-consuming.
-- Leveraging an AI-powered podcast solution effectively addresses these challenges by quickly converting PDFs into simplified, listener-friendly audio content—significantly improving productivity and audience engagement.
+Your AI-powered podcast solution automates every step—solving these clearly.
 
 
 ## Introducing the AI-powered PDF-to-Podcast Generation System
@@ -173,7 +190,7 @@ To whitelist the IP, go to the GridDB Cloud Admin and navigate to the **Network 
 
 ![ip whitelist](images/ip-whitelist.png)
 
-## Building the Podcast Generator Step-by-Step
+## Building the Podcast Generator
 
 ### Developing the Next.js Web Interface & API
 
@@ -529,7 +546,7 @@ The full source code for saving data into GridDB is in the `apps/app/lib/griddb.
 
 The user interface is built with React and Shadcn components. It has two main tabs:
 
-### 1. Upload & Convert Interface
+### 1. Upload & Convert PDF
 
 ![podcast ui](images/pdf-to-podcast.png)
 
